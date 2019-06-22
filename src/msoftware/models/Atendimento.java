@@ -19,7 +19,7 @@ public class Atendimento {
     public static Atendimento criarAtendimento(String cpfCliente, Atendente atendente){
         Atendimento atendimento = new Atendimento(atendente);
         Cliente clienteEncontrado = Cliente.procurarCPF(cpfCliente);
-        if(clienteEncontrado == null) throw new RuntimeException("Cliente não existe");
+        if(clienteEncontrado == null) return null;
         atendimento.setCliente(clienteEncontrado);
         return atendimento;
     }

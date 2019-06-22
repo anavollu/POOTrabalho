@@ -3,6 +3,7 @@ package msoftware;
 import java.util.Scanner;
 import msoftware.models.Atendente;
 import msoftware.models.Atendimento;
+import msoftware.models.Cliente;
 import msoftware.models.Item;
 import msoftware.models.Pagamento;
 
@@ -16,7 +17,9 @@ public class Msoftware {
         while (menu != 4) {
             printMenuInicial();
             menu = SCAN.nextInt();
-            if (menu == 1) {
+            if(menu == 0){
+                cadastrarCliente();
+            }else if (menu == 1) {
                 cadastrarItem();
             } else if (menu == 2) {
                 cadastrarAtendente();
@@ -29,9 +32,11 @@ public class Msoftware {
                         menuAtendimento = SCAN.nextInt();
                         if (menuAtendimento != 3) {
                             Atendimento atendimento = iniciarAtendimento(menuAtendimento, atendente);
-                            Pagamento pagamento = finalizarAtendimento(atendimento);
-                            concluirPagamento(pagamento);
-                            gerarNotaFiscal(atendimento);
+                            if(atendimento != null){
+                                Pagamento pagamento = finalizarAtendimento(atendimento);
+                                concluirPagamento(pagamento);
+                                gerarNotaFiscal(atendimento);
+                            }
                         }
                     }
                 } else {
@@ -74,7 +79,11 @@ public class Msoftware {
             if (menuAtendendo == 1) {
                 String cod = getStringWithMessage("DIGITE CÓDIGO DO ITEM");
                 Integer num = getIntegerWithMessage("DIGITE QUANTIDADE DE ITENS");
-                atendimento.registrarPedido(cod, num);
+                try{
+                    atendimento.registrarPedido(cod, num);
+                } catch(RuntimeException e){
+                    System.out.println(e.getMessage().toUpperCase());
+                }
             } else if (menuAtendendo == 2) {
                 pagamento = atendimento.fecharAtendimento();
             }
@@ -88,16 +97,28 @@ public class Msoftware {
             if (menuAtendimento == 1) {
                 String cpfCliente = getStringWithMessage("DIGITE O CPF DO CLIENTE");
                 atendimento = Atendimento.criarAtendimento(cpfCliente, atendente);
+                if(atendimento == null){
+                    System.out.println("CPF INVÁLIDO");
+                    return null;
+                }else{
+                    System.out.println("BEM VINDO "+atendimento.getCliente().getNome());
+                }
             } else if (menuAtendimento == 2) {
                 atendimento = Atendimento.criarAtendimento(atendente);
             }
         }
         return atendimento;
     }
+    
+    private static void cadastrarCliente() {
+        String nome = getStringWithMessage("DIGITE O NOME DO CLIENTE");
+        String cpf = getStringWithMessage("DIGITE O CPF DO CLIENTE");
+        Cliente.cadastrarCliente(cpf, nome);
+        System.out.println("O CADASTRADO COM SUCESSO");
+    }
 
     private static void cadastrarAtendente() {
-        System.out.println("DIGITE O NOME DO ATENDENTE");
-        String nome = SCAN.next();
+        String nome = getStringWithMessage("DIGITE O NOME DO ATENDENTE");
         Atendente atendente = Atendente.cadastrarAtendente(nome);
         System.out.println("ID DO ATENDENTE É: " + atendente.getId());
     }
@@ -110,8 +131,9 @@ public class Msoftware {
     }
 
     private static void printMenuInicial() {
-        System.out.println("1 - CRIAR ITEM");
-        System.out.println("2 - CRIAR ATENDENTE");
+        System.out.println("0 - CADASTRAR CLIENTE");
+        System.out.println("1 - CADASTRAR ITEM");
+        System.out.println("2 - CADASTRAR ATENDENTE");
         System.out.println("3 - LOGAR COM ID");
         System.out.println("4 - SAIR");
     }
